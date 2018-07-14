@@ -1,8 +1,8 @@
 # ***Work in progress***
 
-C# is a great programming language but does not have a handy way to update immutable objects partially. AutoReiviser provides helper extensions methods to generate partially updated copies of immutable objects using lambda expressions. You need not to write many `With...()` methods anymore. You just need to tell AutoReviser what properties should be updated to what values using lambda expression.
+C# is a great programming language but does not have a handy way to update immutable objects partially. AutoReviser provides helper extension methods to generate partially updated copies of immutable objects using lambda expressions. You need not to write `With...()` methods anymore. You just need to tell AutoReviser what properties should be updated to what values using lambda expression.
 
-There is a immutable object class.
+There is an immutable object class.
 
 ```csharp
 public class ImmutableObject
