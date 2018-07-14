@@ -1,20 +1,28 @@
-# ***Work in progress***
-
 C# is a great programming language but does not have a handy way to update immutable objects partially. AutoReviser provides helper extension methods to generate partially updated copies of immutable objects using lambda expressions. You need not to write `With...()` methods anymore. You just need to tell AutoReviser what properties should be updated to what values using lambda expression.
 
-There is an immutable object class.
+## How to use
+
+There are immutable object classes.
 
 ```csharp
 public class ImmutableObject
 {
-    public ImmutableObject(int alfa, double bravo, string charlie)
-        => (Alfa, Bravo, Charlie) = (alfa, bravo, charlie);
+    public ImmutableObject(int alfa, string bravo)
+        => (Alfa, Bravo) = (alfa, bravo);
 
     public int Alfa { get; }
 
-    public double Bravo { get; }
+    public string Bravo { get; }
+}
 
-    public string Charlie { get; }
+public class ComplexImmutableObject
+{
+    public ComplexImmutableObject(int charile, ImmutableObject delta)
+        => (Charlie, Delta) = (charlie, delta);
+
+    public int Charlie { get; }
+
+    public ImmutableObject Delta { get; }
 }
 ```
 
@@ -26,20 +34,32 @@ public static class ImmutableObjectExtensins
     // I'm tired of writing these 'With...' methods.
 
     public static ImmutableObject WithAlfa(this source, int alfa)
-        => new ImmutableObject(alfa, source.Bravo, source.Charile);
+    {
+        return new ImmutableObject(alfa, source.Bravo);
+    }
 
-    public static ImmutableObject WithBravo(this source, double bravo)
-        => new ImmutableObject(source.Alfa, bravo, source.Charile);
+    public static ImmutableObject WithBravo(this source, string bravo)
+    {
+        return new ImmutableObject(source.Alfa, bravo);
+    }
 
-    public static ImmutableObject WithCharlie(this source, string charlie)
-        => new ImmutableObject(source.Alfa, source.Bravo, charile);
+    public static ComplexImmutableObject WithCharlie(this source, int charlie)
+    {
+        return new ComplexImmutableObject(charlie, source.Delta);
+    }
+
+    public static ComplexImmutableObject WithDelta(
+        this source, ImmutableObject delta)
+    {
+        return new ComplexImmutableObject(source.Charlie, delta);
+    }
 }
 
-var seed = new ImmutableObject(1, 2.0, "foo");
+var source = new ComplexImmutableObject(1, new ImmutableObject(2, "foo"));
 
-var revision = seed
-    .WithAlfa(3)
-    .WithCharlie("bar");
+var revision = source
+    .WithCharlie(10)
+    .WithDelta(source.Delta.WithBravo("foo"));
 ```
 
 ### Using AutoReviser
@@ -47,12 +67,18 @@ var revision = seed
 ```csharp
 using AutoReviser;
 
-var seed = new ImmutableObject(1, 2.0, "foo");
+var source = new ComplexImmutableObject(1, new ImmutableObject(2, "foo"));
 
-var revision = seed.Revise(
+var revision = source.Revise(
     x =>
-    x.Alfa == 3 &&
-    x.Charile == "bar");
+    x.Charlie == 10 &&
+    x.Delta.Bravo = "foo");
+```
+
+## Install package
+
+```text
+PM> Install-Package AutoReviser
 ```
 
 ## License
