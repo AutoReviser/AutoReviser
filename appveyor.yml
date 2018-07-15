@@ -1,0 +1,12 @@
+version: 0.1.{build}
+image: Visual Studio 2017
+configuration: Release
+before_build:
+- cmd: nuget restore source\AutoReviser.sln
+build:
+  verbosity: minimal
+after_build:
+test:
+  assemblies: '**\*.tests.dll'
+artifacts:
+- path: '**\AutoReviser.**.nupkg'

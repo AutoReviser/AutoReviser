@@ -1,3 +1,7 @@
+# AutoRevisor
+
+[![Build status](https://ci.appveyor.com/api/projects/status/n9tskki80p2g6ahk/branch/master?svg=true)](https://ci.appveyor.com/project/gyuwon/autoreviser/branch/master)
+
 C# is a great programming language but does not have a handy way to update immutable objects partially. AutoReviser provides helper extension methods to generate partially updated copies of immutable objects using lambda expressions. You need not to write `With...()` methods anymore. You just need to tell AutoReviser what properties should be updated to what values using lambda expression.
 
 ## How to use
