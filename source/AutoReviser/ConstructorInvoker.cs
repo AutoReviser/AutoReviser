@@ -54,6 +54,7 @@
                 if (_arguments[i].Match(property))
                 {
                     _arguments[i] = _arguments[i].ReviseWith(value);
+                    break;
                 }
             }
         }
