@@ -8,6 +8,12 @@
     /// </summary>
     public static class ImmutableExtensions
     {
+        private static readonly IReviser[] _revisers = new IReviser[]
+        {
+            new ImmutableArrayReviser(),
+            new ObjectReviser(),
+        };
+
         /// <summary>
         /// Create new object that is a partially updated copy of the specified source object.
         /// </summary>
@@ -51,10 +57,16 @@
         public static T Revise<T>(
             this T instance, Expression<Func<T, bool>> predicate)
         {
-            var invoker = ConstructorInvoker.Create<T>();
-            new SeedVisitor(invoker).Visit(seed: instance);
-            new PredicateVisitor(invoker, argument: instance).Visit(predicate);
-            return (T)invoker.Invoke();
+            T revision = default;
+            foreach (IReviser reviser in _revisers)
+            {
+                if (reviser.TryRevise(instance, predicate, out revision))
+                {
+                    break;
+                }
+            }
+
+            return revision;
         }
     }
 }

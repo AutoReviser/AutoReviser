@@ -1,6 +1,7 @@
 ﻿namespace AutoReviser
 {
     using System;
+    using System.Collections.Immutable;
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -183,6 +184,16 @@
             actual.Golf.Echo.Alfa.Should().Be(alfa);
             actual.Golf.Echo.Bravo.Should().Be(seed.Golf.Echo.Bravo);
             actual.Golf.Echo.Charlie.Should().Be(seed.Golf.Echo.Charlie);
+        }
+
+        [TestMethod]
+        [AutoData]
+        public void Revise_updates_element_of_immutable_array(
+            [ImmutableArrayCustomization] ImmutableArray<string> seed,
+            string element)
+        {
+            ImmutableArray<string> actual = seed.Revise(x => x[1] == element);
+            actual[1].Should().Be(element);
         }
     }
 }
