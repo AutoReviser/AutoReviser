@@ -2,6 +2,7 @@
 {
     using System;
     using System.Linq.Expressions;
+    using static System.Reflection.BindingFlags;
 
     /// <summary>
     /// Provides extension methods to generate partially updated copies of immutable objects.
@@ -67,6 +68,16 @@
             }
 
             return revision;
+        }
+
+        internal static object Revise(
+            this object instance, Type typeArgument, LambdaExpression predicate)
+        {
+            // TODO: Cache the method instance.
+            return typeof(ImmutableExtensions)
+                .GetMethod("Revise", Public | Static)
+                .MakeGenericMethod(typeArgument)
+                .Invoke(default, new object[] { instance, predicate });
         }
     }
 }

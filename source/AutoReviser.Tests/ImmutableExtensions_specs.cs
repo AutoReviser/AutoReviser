@@ -129,7 +129,7 @@
 
         [TestMethod]
         [AutoData]
-        public void Revise_creates_new_object_with_new_more_deep_property_value(
+        public void Revise_creates_new_object_with_new_deeper_property_value(
             MoreComplexImmutableObject seed, Guid alfa)
         {
             // Act
@@ -146,7 +146,7 @@
 
         [TestMethod]
         [AutoData]
-        public void Revise_creates_new_object_with_two_new_more_deep_property_values(
+        public void Revise_creates_new_object_with_two_new_deeper_property_values(
             MoreComplexImmutableObject seed, Guid alfa, int bravo)
         {
             // Act
@@ -188,12 +188,42 @@
 
         [TestMethod]
         [AutoData]
-        public void Revise_updates_element_of_immutable_array(
+        public void Revise_updates_immutable_array_element(
             [ImmutableArrayCustomization] ImmutableArray<string> seed,
             string element)
         {
             ImmutableArray<string> actual = seed.Revise(x => x[1] == element);
             actual[1].Should().Be(element);
+        }
+
+        [TestMethod]
+        [AutoData]
+        public void Revise_updates_property_of_immutable_array_element(
+            [ImmutableArrayCustomization]
+            ImmutableArray<SimpleImmutableObject> seed,
+            string charlie)
+        {
+            // Act
+            ImmutableArray<SimpleImmutableObject> actual =
+                seed.Revise(x => x[1].Charlie == charlie);
+
+            // Assert
+            actual[1].Charlie.Should().Be(charlie);
+        }
+
+        [TestMethod]
+        [AutoData]
+        public void Revise_updates_deep_property_of_immutable_array_element(
+            [ImmutableArrayCustomization]
+            ImmutableArray<ComplexImmutableObject> seed,
+            string charlie)
+        {
+            // Act
+            ImmutableArray<ComplexImmutableObject> actual =
+                seed.Revise(x => x[1].Echo.Charlie == charlie);
+
+            // Assert
+            actual[1].Echo.Charlie.Should().Be(charlie);
         }
     }
 }

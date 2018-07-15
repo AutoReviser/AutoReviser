@@ -67,7 +67,7 @@
             PropertyInfo property = path.Pop();
             object value = path.Any()
                 ? Evaluate(property, path, right)
-                : Evaluate(right);
+                : right.Evaluate();
             _invoker.UpdateArgumentIfMatch(property, value);
         }
 
@@ -80,7 +80,7 @@
             object instance = _invoker.FindArgument(property);
             LambdaExpression predicate =
                 MakePredicateLambda(propertyType, path, right);
-            return Revise(propertyType, instance, predicate);
+            return instance.Revise(propertyType, predicate);
         }
 
         private static LambdaExpression MakePredicateLambda(
@@ -100,21 +100,6 @@
             Expression right)
         {
             return MakeBinary(ExpressionType.Equal, left, right);
-        }
-
-        private static object Revise(
-            Type typeArgument, object instance, LambdaExpression predicate)
-        {
-            // TODO: Cache the method instance.
-            return typeof(ImmutableExtensions)
-                .GetMethod("Revise", Public | Static)
-                .MakeGenericMethod(typeArgument)
-                .Invoke(default, new object[] { instance, predicate });
-        }
-
-        private static object Evaluate(Expression expression)
-        {
-            return Lambda(expression).Compile().DynamicInvoke();
         }
     }
 }

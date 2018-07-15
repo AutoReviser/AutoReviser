@@ -13,6 +13,15 @@
                 && type.GetGenericTypeDefinition().FullName == name;
         }
 
+        public static object GetItem<T>(this T instance, int index)
+        {
+            return instance
+                .GetType()
+                .GetProperty("Item")
+                .GetMethod
+                .Invoke(instance, new object[] { index });
+        }
+
         public static T SetItem<T>(this T instance, int index, object item)
         {
             return (T)instance
