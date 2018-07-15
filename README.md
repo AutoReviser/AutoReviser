@@ -72,7 +72,7 @@ var source = new ComplexImmutableObject(1, new ImmutableObject(2, "foo"));
 var revision = source.Revise(
     x =>
     x.Charlie == 10 &&
-    x.Delta.Bravo = "foo");
+    x.Delta.Bravo == "foo");
 ```
 
 ## Install package

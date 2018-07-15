@@ -45,7 +45,7 @@
         /// var revision = source.Revise(
         ///     x =>
         ///     x.Charlie == 10 &&
-        ///     x.Delta.Bravo = "foo");
+        ///     x.Delta.Bravo == "foo");
         /// </code>
         /// </example>
         public static T Revise<T>(
