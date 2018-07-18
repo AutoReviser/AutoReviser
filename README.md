@@ -37,23 +37,26 @@ public static class ImmutableObjectExtensins
 {
     // I'm tired of writing these 'With...' methods.
 
-    public static ImmutableObject WithAlfa(this source, int alfa)
+    public static ImmutableObject WithAlfa(
+        this ImmutableObject source, int alfa)
     {
         return new ImmutableObject(alfa, source.Bravo);
     }
 
-    public static ImmutableObject WithBravo(this source, string bravo)
+    public static ImmutableObject WithBravo(
+        this ImmutableObject source, string bravo)
     {
         return new ImmutableObject(source.Alfa, bravo);
     }
 
-    public static ComplexImmutableObject WithCharlie(this source, int charlie)
+    public static ComplexImmutableObject WithCharlie(
+        this ComplexImmutableObject source, int charlie)
     {
         return new ComplexImmutableObject(charlie, source.Delta);
     }
 
     public static ComplexImmutableObject WithDelta(
-        this source, ImmutableObject delta)
+        this ComplexImmutableObject source, ImmutableObject delta)
     {
         return new ComplexImmutableObject(source.Charlie, delta);
     }
