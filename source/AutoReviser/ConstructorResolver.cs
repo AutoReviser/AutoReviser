@@ -8,6 +8,9 @@
     {
         // TODO: Cache the constructor instance.
         public static ConstructorInfo Resolve<T>()
-            => typeof(T).GetConstructors(Public | Instance).Single();
+        {
+            BindingFlags attr = Public | NonPublic | Instance;
+            return typeof(T).GetConstructors(attr).Single();
+        }
     }
 }

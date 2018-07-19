@@ -195,5 +195,33 @@
             ImmutableArray<string> actual = seed.Revise(x => x[1] == element);
             actual[1].Should().Be(element);
         }
+
+        public class HasPrivateConstructor
+        {
+            private HasPrivateConstructor(int alfa, string bravo)
+                => (Alfa, Bravo) = (alfa, bravo);
+
+            public int Alfa { get; }
+
+            public string Bravo { get; }
+
+            public static HasPrivateConstructor Create()
+                => new HasPrivateConstructor(alfa: 1, bravo: "foo");
+        }
+
+        [TestMethod]
+        [AutoData]
+        public void Revise_creates_new_object_using_non_public_constructor_correctly(
+            int alfa, string bravo)
+        {
+            var seed = HasPrivateConstructor.Create();
+
+            HasPrivateConstructor actual =
+                seed.Revise(x => x.Alfa == alfa && x.Bravo == bravo);
+
+            actual.Should().NotBeNull();
+            actual.Alfa.Should().Be(alfa);
+            actual.Bravo.Should().Be(bravo);
+        }
     }
 }
