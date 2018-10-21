@@ -58,6 +58,11 @@
                     path.Push(property);
                     Track(member.Expression, path);
                     break;
+
+                case UnaryExpression unary
+                when unary.NodeType == ExpressionType.Convert:
+                    Track(unary.Operand, path);
+                    break;
             }
         }
 
@@ -67,7 +72,7 @@
             PropertyInfo property = path.Pop();
             object value = path.Any()
                 ? Evaluate(property, path, right)
-                : Evaluate(right);
+                : Evaluate(property, right);
             _invoker.UpdateArgumentIfMatch(property, value);
         }
 
@@ -112,9 +117,20 @@
                 .Invoke(default, new object[] { instance, predicate });
         }
 
-        private static object Evaluate(Expression expression)
+        private static object Evaluate(
+            PropertyInfo property, Expression expression)
         {
-            return Lambda(expression).Compile().DynamicInvoke();
+            switch (expression)
+            {
+                case UnaryExpression unary
+                when
+                    unary.NodeType == ExpressionType.Convert &&
+                    unary.Operand.Type == property.PropertyType:
+                    return Lambda(unary.Operand).Compile().DynamicInvoke();
+
+                default:
+                    return Lambda(expression).Compile().DynamicInvoke();
+            }
         }
     }
 }

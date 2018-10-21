@@ -223,5 +223,37 @@
             actual.Alfa.Should().Be(alfa);
             actual.Bravo.Should().Be(bravo);
         }
+
+        public enum Color
+        {
+            Red,
+            Yellow,
+            Blue,
+        }
+
+        public class HasEnumProperty
+        {
+            public HasEnumProperty(int alfa, Color bravo)
+            {
+                Alfa = alfa;
+                Bravo = bravo;
+            }
+
+            public int Alfa { get; }
+
+            public Color Bravo { get; }
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_updates_property_of_enum_type_correctly(
+            HasEnumProperty seed, Color bravo)
+        {
+            HasEnumProperty actual = default;
+
+            Action action = () => actual = seed.Revise(x => x.Bravo == bravo);
+
+            action.Should().NotThrow();
+            actual.Bravo.Should().Be(bravo);
+        }
     }
 }
