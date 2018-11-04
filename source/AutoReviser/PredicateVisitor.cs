@@ -8,7 +8,7 @@
     using static System.Linq.Expressions.Expression;
     using static System.Reflection.BindingFlags;
 
-    internal struct PredicateVisitor
+    internal readonly struct PredicateVisitor
     {
         private readonly ConstructorInvoker _invoker;
         private readonly object _argument;
@@ -38,73 +38,90 @@
                     Visit(right);
                     break;
 
-                default: Visit(expression.Left, expression.Right); break;
+                default:
+                    Visit(expression.Left, expression.Right);
+                    break;
             }
         }
 
         private void Visit(Expression left, Expression right)
         {
-            var path = new Stack<PropertyInfo>();
-            Track(expression: left, path);
+            Queue<Expression> path = Deconstruct(left);
             UpdateArgument(path, right);
         }
 
-        private void Track(Expression expression, Stack<PropertyInfo> path)
+        private Queue<Expression> Deconstruct(Expression left)
         {
-            switch (expression)
+            switch (left)
             {
                 case MemberExpression member
                 when member.Member is PropertyInfo property:
-                    path.Push(property);
-                    Track(member.Expression, path);
-                    break;
+                    {
+                        Queue<Expression> path = Deconstruct(member.Expression);
+                        path.Enqueue(member);
+                        return path;
+                    }
+
+                case MethodCallExpression call:
+                    {
+                        Queue<Expression> path = Deconstruct(call.Object);
+                        path.Enqueue(call);
+                        return path;
+                    }
 
                 case UnaryExpression unary
                 when unary.NodeType == ExpressionType.Convert:
-                    Track(unary.Operand, path);
-                    break;
+                    {
+                        return Deconstruct(unary.Operand);
+                    }
+
+                default: return new Queue<Expression>();
             }
         }
 
         private void UpdateArgument(
-            Stack<PropertyInfo> path, Expression right)
+            Queue<Expression> path, Expression right)
         {
-            PropertyInfo property = path.Pop();
-            object value = path.Any()
-                ? Evaluate(property, path, right)
-                : Evaluate(property, right);
-            _invoker.UpdateArgumentIfMatch(property, value);
-        }
+            switch (path.Dequeue())
+            {
+                case MemberExpression member
+                when member.Member is PropertyInfo property:
+                    if (path.Any())
+                    {
+                        Type propertyType = property.PropertyType;
+                        ParameterExpression parameter = Parameter(propertyType);
+                        Expression expr = parameter;
+                        foreach (var e in path)
+                        {
+                            switch (e)
+                            {
+                                case MemberExpression m
+                                when m.Member is PropertyInfo p:
+                                    expr = MakeMemberAccess(expr, p);
+                                    break;
 
-        private object Evaluate(
-            PropertyInfo property,
-            IEnumerable<PropertyInfo> path,
-            Expression right)
-        {
-            Type propertyType = property.PropertyType;
-            object instance = _invoker.FindArgument(property);
-            LambdaExpression predicate =
-                MakePredicateLambda(propertyType, path, right);
-            return Revise(propertyType, instance, predicate);
-        }
+                                case MethodCallExpression c:
+                                    expr = Call(expr, c.Method, c.Arguments);
+                                    break;
+                            }
+                        }
 
-        private static LambdaExpression MakePredicateLambda(
-            Type parameterType,
-            IEnumerable<PropertyInfo> path,
-            Expression right)
-        {
-            ParameterExpression parameter = Parameter(parameterType);
-            Expression seed = parameter;
-            Expression left = path.Aggregate(seed, MakeMemberAccess);
-            BinaryExpression predicate = MakeEqualBinary(left, right);
-            return Lambda(predicate, parameter);
-        }
+                        var predicate = MakeBinary(ExpressionType.Equal, expr, right);
+                        var lambda = Lambda(predicate, parameter);
+                        object instance = _invoker.FindArgument(property);
+                        var argument = Revise(propertyType, instance, lambda);
+                        _invoker.UpdateArgumentIfMatch(property, argument);
 
-        private static BinaryExpression MakeEqualBinary(
-            Expression left,
-            Expression right)
-        {
-            return MakeBinary(ExpressionType.Equal, left, right);
+                        break;
+                    }
+                    else
+                    {
+                        object instance = _invoker.FindArgument(property);
+                        var argument = Lambda(right).Compile().DynamicInvoke();
+                        _invoker.UpdateArgumentIfMatch(property, argument);
+                        break;
+                    }
+            }
         }
 
         private static object Revise(
@@ -115,22 +132,6 @@
                 .GetMethod("Revise", Public | Static)
                 .MakeGenericMethod(typeArgument)
                 .Invoke(default, new object[] { instance, predicate });
-        }
-
-        private static object Evaluate(
-            PropertyInfo property, Expression expression)
-        {
-            switch (expression)
-            {
-                case UnaryExpression unary
-                when
-                    unary.NodeType == ExpressionType.Convert &&
-                    unary.Operand.Type == property.PropertyType:
-                    return Lambda(unary.Operand).Compile().DynamicInvoke();
-
-                default:
-                    return Lambda(expression).Compile().DynamicInvoke();
-            }
         }
     }
 }

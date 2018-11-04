@@ -20,32 +20,6 @@
             public string Charlie { get; }
         }
 
-        public class ComplexImmutableObject
-        {
-            public ComplexImmutableObject(
-                Guid delta, SimpleImmutableObject echo)
-            {
-                (Delta, Echo) = (delta, echo);
-            }
-
-            public Guid Delta { get; }
-
-            public SimpleImmutableObject Echo { get; }
-        }
-
-        public class MoreComplexImmutableObject
-        {
-            public MoreComplexImmutableObject(
-                Guid foxtrot, ComplexImmutableObject golf)
-            {
-                (Foxtrot, Golf) = (foxtrot, golf);
-            }
-
-            public Guid Foxtrot { get; }
-
-            public ComplexImmutableObject Golf { get; }
-        }
-
         [TestMethod]
         [AutoData]
         public void Revise_creates_new_object_with_new_property_value(
@@ -93,6 +67,19 @@
             actual.Charlie.Should().Be(charlie);
         }
 
+        public class ComplexImmutableObject
+        {
+            public ComplexImmutableObject(
+                Guid delta, SimpleImmutableObject echo)
+            {
+                (Delta, Echo) = (delta, echo);
+            }
+
+            public Guid Delta { get; }
+
+            public SimpleImmutableObject Echo { get; }
+        }
+
         [TestMethod]
         [AutoData]
         public void Revise_creates_new_object_with_new_deep_property_value(
@@ -125,6 +112,19 @@
             actual.Echo.Alfa.Should().Be(alfa);
             actual.Echo.Bravo.Should().Be(bravo);
             actual.Echo.Charlie.Should().Be(seed.Echo.Charlie);
+        }
+
+        public class MoreComplexImmutableObject
+        {
+            public MoreComplexImmutableObject(
+                Guid foxtrot, ComplexImmutableObject golf)
+            {
+                (Foxtrot, Golf) = (foxtrot, golf);
+            }
+
+            public Guid Foxtrot { get; }
+
+            public ComplexImmutableObject Golf { get; }
         }
 
         [TestMethod]
@@ -254,6 +254,62 @@
 
             action.Should().NotThrow();
             actual.Bravo.Should().Be(bravo);
+        }
+
+        public class HasImmutableArrayProperty
+        {
+            public HasImmutableArrayProperty(
+                int alfa,
+                ImmutableArray<string> bravo,
+                ImmutableArray<SimpleImmutableObject> charlie,
+                ImmutableArray<ComplexImmutableObject> delta)
+            {
+                Alfa = alfa;
+                Bravo = bravo;
+                Charlie = charlie;
+                Delta = delta;
+            }
+
+            public int Alfa { get; }
+
+            public ImmutableArray<string> Bravo { get; }
+
+            public ImmutableArray<SimpleImmutableObject> Charlie { get; }
+
+            public ImmutableArray<ComplexImmutableObject> Delta { get; }
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_updates_element_in_immutable_array_correctly(
+            [ImmutableArrayCustomization] HasImmutableArrayProperty seed,
+            string element)
+        {
+            HasImmutableArrayProperty revision =
+                seed.Revise(x => x.Bravo[1] == element);
+
+            revision.Bravo[1].Should().Be(element);
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_updates_property_of_element_in_immutable_array_type_correctly(
+            [ImmutableArrayCustomization] HasImmutableArrayProperty seed,
+            Guid element)
+        {
+            HasImmutableArrayProperty revision =
+                seed.Revise(x => x.Charlie[1].Alfa == element);
+
+            revision.Charlie[1].Alfa.Should().Be(element);
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_updates_deep_property_of_element_in_immutable_array_type_correctly(
+            [ImmutableArrayCustomization] HasImmutableArrayProperty seed,
+            Guid element)
+        {
+            HasImmutableArrayProperty revision =
+                seed.Revise(x => x.Delta[1].Echo.Alfa == element);
+
+            revision.Delta[1].Echo.Alfa.Should().Be(element);
         }
     }
 }
