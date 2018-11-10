@@ -1,104 +1,85 @@
 ﻿namespace AutoReviser
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Reflection;
+    using static ExpressionAssembler;
     using static System.Linq.Expressions.Expression;
-    using static System.Reflection.BindingFlags;
 
     internal class ImmutableArrayReviser : IReviser
     {
         public bool TryRevise<T>(
             T instance, LambdaExpression predicate, out T revision)
         {
-            if (instance.IsImmutableArray() == false)
+            if (ImmutableArray.IsImmutableArray<T>() == false)
             {
                 revision = default;
                 return false;
             }
-
-            revision = Revise(instance, predicate);
-            return true;
+            else
+            {
+                revision = Revise(instance, predicate);
+                return true;
+            }
         }
 
         private static T Revise<T>(T instance, LambdaExpression predicate)
         {
-            var expression = predicate.Body as BinaryExpression;
-            Expression left = expression.Left;
-            Expression right = expression.Right;
-
-            Queue<Expression> path = Deconstruct(left);
-
-            switch (path.Dequeue())
-            {
-                case MethodCallExpression call:
-                    if (path.Any())
-                    {
-                        ParameterExpression parameter = Parameter(call.Type);
-                        Expression expr = parameter;
-                        foreach (var e in path)
-                        {
-                            switch (e)
-                            {
-                                case MemberExpression m
-                                when m.Member is PropertyInfo p:
-                                    expr = MakeMemberAccess(expr, p);
-                                    break;
-                            }
-                        }
-
-                        BinaryExpression b = MakeBinary(ExpressionType.Equal, expr, right);
-                        var lambda = Lambda(b, parameter);
-                        var index = (int)call.Arguments[0].Evaluate();
-                        var argument = Revise(call.Type, instance.Item(index), lambda);
-                        return instance.SetItem(index, argument);
-                    }
-                    else
-                    {
-                        var index = (int)call.Arguments[0].Evaluate();
-                        object item = right.Evaluate();
-                        return instance.SetItem(index, item);
-                    }
-
-                default:
-                    string message = "Could not parse the expression";
-                    throw new NotSupportedException(message);
-            }
+            object[] elements = ImmutableArray.ToArray(instance);
+            new PredicateVisitor(elements).Visit(lambda: predicate);
+            return ImmutableArray.Create<T>(elements);
         }
 
-        private static Queue<Expression> Deconstruct(Expression left)
+        private readonly struct PredicateVisitor
         {
-            switch (left)
+            private readonly object[] _elements;
+
+            public PredicateVisitor(object[] elements) => _elements = elements;
+
+            public void Visit(LambdaExpression lambda) => Visit(lambda.Body);
+
+            private void Visit(Expression expression)
             {
-                case MemberExpression member
-                when member.Member is PropertyInfo property:
-                    {
-                        Queue<Expression> path = Deconstruct(member.Expression);
-                        path.Enqueue(member);
-                        return path;
-                    }
-
-                case MethodCallExpression call:
-                    {
-                        Queue<Expression> path = Deconstruct(call.Object);
-                        path.Enqueue(call);
-                        return path;
-                    }
-
-                default: return new Queue<Expression>();
+                switch (expression)
+                {
+                    case BinaryExpression binary: Visit(binary); break;
+                }
             }
-        }
 
-        private static object Revise(
-            Type typeArgument, object instance, LambdaExpression predicate)
-        {
-            // TODO: Cache the method instance.
-            return typeof(ImmutableExtensions)
-                .GetMethod("Revise", Public | Static)
-                .MakeGenericMethod(typeArgument)
-                .Invoke(default, new object[] { instance, predicate });
+            private void Visit(BinaryExpression binary)
+            {
+                switch (binary.Left)
+                {
+                    case BinaryExpression left
+                    when binary.Right is BinaryExpression right:
+                        Visit(left);
+                        Visit(right);
+                        break;
+
+                    default:
+                        Visit(binary.Left, binary.Right);
+                        break;
+                }
+            }
+
+            private void Visit(Expression left, Expression right)
+            {
+                Queue<Expression> path = Disassemble(left);
+                var call = (MethodCallExpression)path.Dequeue();
+                var index = (int)call.Arguments[0].Evaluate();
+                if (path.Any())
+                {
+                    object element = _elements[index];
+                    ParameterExpression parameter = Parameter(call.Type);
+                    var lambda = AssembleLambda(parameter, path, right);
+                    var newElement = Reviser.Revise(call.Type, element, lambda);
+                    _elements[index] = newElement;
+                }
+                else
+                {
+                    _elements[index] = right.Evaluate();
+                }
+            }
         }
     }
 }

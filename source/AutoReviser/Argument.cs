@@ -4,10 +4,9 @@
     using System.Reflection;
     using static System.StringComparison;
 
-    internal struct ConstructorArgument
+    internal struct Argument
     {
-        public ConstructorArgument(
-            Type parameterType, string parameterName, object value)
+        public Argument(Type parameterType, string parameterName, object value)
         {
             ParameterType = parameterType;
             ParameterName = parameterName;
@@ -24,7 +23,7 @@
             => property.PropertyType == ParameterType
             && property.Name.Equals(ParameterName, OrdinalIgnoreCase);
 
-        public ConstructorArgument ReviseWith(object value)
-            => new ConstructorArgument(ParameterType, ParameterName, value);
+        public Argument SetValue(object value)
+            => new Argument(ParameterType, ParameterName, value);
     }
 }

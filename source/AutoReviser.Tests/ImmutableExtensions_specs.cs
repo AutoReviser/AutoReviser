@@ -188,12 +188,26 @@
 
         [TestMethod]
         [AutoData]
-        public void Revise_updates_element_of_immutable_array(
+        public void Revise_updates_element_in_immutable_array(
             [ImmutableArrayCustomization] ImmutableArray<string> seed,
             string element)
         {
             ImmutableArray<string> actual = seed.Revise(x => x[1] == element);
             actual[1].Should().Be(element);
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_updates_multiple_elements_in_immutable_array(
+            [ImmutableArrayCustomization] ImmutableArray<string> seed,
+            string element)
+        {
+            ImmutableArray<string> revision = seed.Revise(
+                x =>
+                x[0] == element &&
+                x[1] == element);
+
+            revision[0].Should().Be(element);
+            revision[1].Should().Be(element);
         }
 
         public class HasPrivateConstructor
@@ -280,7 +294,7 @@
         }
 
         [TestMethod, AutoData]
-        public void Revise_updates_element_in_immutable_array_correctly(
+        public void Revise_updates_element_in_nested_immutable_array_correctly(
             [ImmutableArrayCustomization] HasImmutableArrayProperty seed,
             string element)
         {
@@ -291,7 +305,7 @@
         }
 
         [TestMethod, AutoData]
-        public void Revise_updates_property_of_element_in_immutable_array_type_correctly(
+        public void Revise_updates_property_of_element_in_nested_immutable_array_type_correctly(
             [ImmutableArrayCustomization] HasImmutableArrayProperty seed,
             Guid element)
         {
@@ -302,7 +316,7 @@
         }
 
         [TestMethod, AutoData]
-        public void Revise_updates_deep_property_of_element_in_immutable_array_type_correctly(
+        public void Revise_updates_deep_property_of_element_in_nested_immutable_array_type_correctly(
             [ImmutableArrayCustomization] HasImmutableArrayProperty seed,
             Guid element)
         {
