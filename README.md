@@ -82,6 +82,29 @@ var revision = source.Revise(
     x.Delta.Bravo == "foo");
 ```
 
+### Immutable Arrays
+
+AutoReviser supports `System.Collections.Immutable.ImmutableArray<T>` class.
+
+```csharp
+using AutoReviser;
+using System.Collections.Immutable;
+
+public class HasImmutableArray
+{
+    public HasImmutableArray(ImmutableArray<string> alfa) => Alfa = alfa;
+
+    public ImmutableArray<string> Alfa { get; }
+}
+
+var source = new HasImmutableArray(alfa: ImmutableArray.Create("foo", "bar"));
+
+var revision = source.Revise(
+    x =>
+    x.Alfa[0] = "baz" &&
+    x.Alfa[1] = "foz");
+```
+
 ## Install package
 
 ```text
