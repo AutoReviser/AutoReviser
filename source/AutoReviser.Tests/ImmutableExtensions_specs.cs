@@ -46,6 +46,40 @@
             public ComplexImmutableObject Golf { get; }
         }
 
+        public class ImmutableObjectWithInternalConstuctor
+        {
+            internal ImmutableObjectWithInternalConstuctor(
+                Guid alfa, int bravo, SimpleImmutableObject charlie)
+            {
+                Alfa = alfa;
+                Bravo = bravo;
+                Charlie = charlie;
+            }
+
+            public Guid Alfa { get; }
+
+            public int Bravo { get; }
+
+            public SimpleImmutableObject Charlie { get; }
+        }
+
+        public class ImmutableObjectWithInternalProperties
+        {
+            public ImmutableObjectWithInternalProperties(
+                Guid alfa, int bravo, SimpleImmutableObject charlie)
+            {
+                Alfa = alfa;
+                Bravo = bravo;
+                Charlie = charlie;
+            }
+
+            internal Guid Alfa { get; }
+
+            internal int Bravo { get; }
+
+            internal SimpleImmutableObject Charlie { get; }
+        }
+
         [TestMethod]
         [AutoData]
         public void Revise_creates_new_object_with_new_property_value(
@@ -194,6 +228,46 @@
         {
             ImmutableArray<string> actual = seed.Revise(x => x[1] == element);
             actual[1].Should().Be(element);
+        }
+
+        [TestMethod]
+        [AutoData]
+        public void Revise_updates_element_with_internal_constructor(
+            Guid alfa,
+            int bravo,
+            SimpleImmutableObject charlie,
+            SimpleImmutableObject expected)
+        {
+            // Arrange
+            var source = new ImmutableObjectWithInternalConstuctor(alfa, bravo, charlie);
+
+            // Act
+            var actual = source.Revise(x => x.Charlie == expected);
+
+            // Assert
+            actual.Alfa.Should().Be(alfa);
+            actual.Bravo.Should().Be(bravo);
+            actual.Charlie.Should().BeEquivalentTo(expected);
+        }
+
+        [TestMethod]
+        [AutoData]
+        public void Revise_updates_element_with_internal_properties(
+            Guid alfa,
+            int bravo,
+            SimpleImmutableObject charlie,
+            SimpleImmutableObject expected)
+        {
+            // Arrange
+            var source = new ImmutableObjectWithInternalProperties(alfa, bravo, charlie);
+
+            // Act
+            var actual = source.Revise(x => x.Charlie == expected);
+
+            // Assert
+            actual.Alfa.Should().Be(alfa);
+            actual.Bravo.Should().Be(bravo);
+            actual.Charlie.Should().BeEquivalentTo(expected);
         }
     }
 }

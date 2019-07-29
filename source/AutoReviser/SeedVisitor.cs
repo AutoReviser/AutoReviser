@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.Reflection;
+    using static System.Reflection.BindingFlags;
 
     internal struct SeedVisitor
     {
@@ -11,7 +12,9 @@
 
         public void Visit(object seed)
         {
-            PropertyInfo[] properties = seed.GetType().GetProperties();
+            PropertyInfo[] properties = seed
+                .GetType()
+                .GetProperties(Public | Instance | NonPublic);
             Visit(properties, instance: seed);
         }
 

@@ -8,6 +8,6 @@
     {
         // TODO: Cache the constructor instance.
         public static ConstructorInfo Resolve<T>()
-            => typeof(T).GetConstructors(Public | Instance).Single();
+            => typeof(T).GetConstructors(Public | Instance | NonPublic).Single();
     }
 }
