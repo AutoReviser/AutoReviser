@@ -2,27 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.1.4</Version>
-    <Product>AutoReviser</Product>
-    <Authors>Gyuwon</Authors>
-    <Copyright>Copyright (c) 2018 Yi Gyuwon</Copyright>
-    <Description>Provides convenient utilities to generate partially updated copies of immutable objects using lambda expressions in C#.</Description>
+    <LangVersion>latest</LangVersion>
+    <CodeAnalysisRuleSet>AutoReviser.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>AutoReviser</PackageId>
+    <Description>Provides convenient utilities to generate partially updated copies of immutable objects using lambda expressions in C#.</Description>
+    <Version>0.2.0</Version>
+    <Authors>Gyuwon</Authors>
+    <Copyright>Copyright (c) 2018 Yi Gyuwon</Copyright>
     <PackageProjectUrl>https://github.com/AutoReviser/AutoReviser</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/AutoReviser/AutoReviser/blob/master/LICENSE</PackageLicenseUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageTags>immutable</PackageTags>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <LangVersion>latest</LangVersion>
-    <CodeAnalysisRuleSet>AutoReviser.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>latest</LangVersion>
-    <CodeAnalysisRuleSet>AutoReviser.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
