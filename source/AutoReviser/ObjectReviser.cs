@@ -34,7 +34,9 @@
 
             Argument[] arguments = argumentQuery.ToArray();
 
-            PropertyInfo[] properties = instance.GetType().GetProperties();
+            PropertyInfo[] properties = instance
+                .GetType()
+                .GetProperties(Public | Instance | NonPublic);
             foreach (PropertyInfo property in properties)
             {
                 for (int i = 0; i < arguments.Length; i++)

@@ -20,6 +20,32 @@
             public string Charlie { get; }
         }
 
+        public class ComplexImmutableObject
+        {
+            public ComplexImmutableObject(
+                Guid delta, SimpleImmutableObject echo)
+            {
+                (Delta, Echo) = (delta, echo);
+            }
+
+            public Guid Delta { get; }
+
+            public SimpleImmutableObject Echo { get; }
+        }
+
+        public class MoreComplexImmutableObject
+        {
+            public MoreComplexImmutableObject(
+                Guid foxtrot, ComplexImmutableObject golf)
+            {
+                (Foxtrot, Golf) = (foxtrot, golf);
+            }
+
+            public Guid Foxtrot { get; }
+
+            public ComplexImmutableObject Golf { get; }
+        }
+
         [TestMethod]
         [AutoData]
         public void Revise_creates_new_object_with_new_property_value(
@@ -67,19 +93,6 @@
             actual.Charlie.Should().Be(charlie);
         }
 
-        public class ComplexImmutableObject
-        {
-            public ComplexImmutableObject(
-                Guid delta, SimpleImmutableObject echo)
-            {
-                (Delta, Echo) = (delta, echo);
-            }
-
-            public Guid Delta { get; }
-
-            public SimpleImmutableObject Echo { get; }
-        }
-
         [TestMethod]
         [AutoData]
         public void Revise_creates_new_object_with_new_deep_property_value(
@@ -112,19 +125,6 @@
             actual.Echo.Alfa.Should().Be(alfa);
             actual.Echo.Bravo.Should().Be(bravo);
             actual.Echo.Charlie.Should().Be(seed.Echo.Charlie);
-        }
-
-        public class MoreComplexImmutableObject
-        {
-            public MoreComplexImmutableObject(
-                Guid foxtrot, ComplexImmutableObject golf)
-            {
-                (Foxtrot, Golf) = (foxtrot, golf);
-            }
-
-            public Guid Foxtrot { get; }
-
-            public ComplexImmutableObject Golf { get; }
         }
 
         [TestMethod]
@@ -324,6 +324,43 @@
                 seed.Revise(x => x.Delta[1].Echo.Alfa == element);
 
             revision.Delta[1].Echo.Alfa.Should().Be(element);
+        }
+
+        public class ImmutableObjectWithInternalProperties
+        {
+            public ImmutableObjectWithInternalProperties(
+                Guid alfa, int bravo, SimpleImmutableObject charlie)
+            {
+                Alfa = alfa;
+                Bravo = bravo;
+                Charlie = charlie;
+            }
+
+            internal Guid Alfa { get; }
+
+            internal int Bravo { get; }
+
+            internal SimpleImmutableObject Charlie { get; }
+        }
+
+        [TestMethod]
+        [AutoData]
+        public void Revise_updates_internal_properties_correctly(
+            Guid alfa,
+            int bravo,
+            SimpleImmutableObject charlie,
+            SimpleImmutableObject expected)
+        {
+            // Arrange
+            var source = new ImmutableObjectWithInternalProperties(alfa, bravo, charlie);
+
+            // Act
+            var actual = source.Revise(x => x.Charlie == expected);
+
+            // Assert
+            actual.Alfa.Should().Be(alfa);
+            actual.Bravo.Should().Be(bravo);
+            actual.Charlie.Should().BeEquivalentTo(expected);
         }
     }
 }
