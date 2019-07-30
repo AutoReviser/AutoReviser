@@ -1,4 +1,4 @@
-version: 0.1.{build}
+version: 0.2.{build}
 image: Visual Studio 2017
 configuration: Release
 before_build:
@@ -10,3 +10,8 @@ test:
   assemblies: '**\*.tests.dll'
 artifacts:
 - path: '**\AutoReviser.**.nupkg'
+deploy:
+- provider: NuGet
+  api_key:
+    secure: lsntLeh0+0gJFZSpHd88aml765YgNzvYWQo+uQVm4LFw3fhOk5F874QdqyvvPCZw
+  artifact: /.*\.nupkg/
