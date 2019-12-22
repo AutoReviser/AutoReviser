@@ -6,7 +6,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
-    public class ImmutableExtensions_specs
+    public class Reviser_specs
     {
         public class SimpleImmutableObject
         {
