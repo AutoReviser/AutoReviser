@@ -295,25 +295,25 @@
         }
 
         [TestMethod, AutoData]
-        public void Revise_updates_property_of_element_in_nested_immutable_array_type_correctly(
+        public void Revise_updates_property_of_element_in_nested_immutable_array_correctly(
             [ImmutableArrayCustomization] HasImmutableArrayProperty seed,
-            Guid element)
+            Guid value)
         {
             HasImmutableArrayProperty revision =
-                seed.Revise(x => x.Charlie[1].Alfa == element);
+                seed.Revise(x => x.Charlie[1].Alfa == value);
 
-            revision.Charlie[1].Alfa.Should().Be(element);
+            revision.Charlie[1].Alfa.Should().Be(value);
         }
 
         [TestMethod, AutoData]
-        public void Revise_updates_deep_property_of_element_in_nested_immutable_array_type_correctly(
+        public void Revise_updates_deep_property_of_element_in_nested_immutable_array_correctly(
             [ImmutableArrayCustomization] HasImmutableArrayProperty seed,
-            Guid element)
+            Guid value)
         {
             HasImmutableArrayProperty revision =
-                seed.Revise(x => x.Delta[1].Echo.Alfa == element);
+                seed.Revise(x => x.Delta[1].Echo.Alfa == value);
 
-            revision.Delta[1].Echo.Alfa.Should().Be(element);
+            revision.Delta[1].Echo.Alfa.Should().Be(value);
         }
 
         public class ImmutableObjectWithInternalProperties
