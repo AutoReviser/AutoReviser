@@ -13,6 +13,8 @@ artifacts:
 - path: '**\AutoReviser.**.snupkg'
 deploy:
 - provider: NuGet
+  server:
   api_key:
-    secure: lsntLeh0+0gJFZSpHd88aml765YgNzvYWQo+uQVm4LFw3fhOk5F874QdqyvvPCZw
-  artifact: /.*\.nupkg/
+    secure: rFmF+VnR00KXB0hBWgJnV2TfoyhCABlABiWUPsWfe077lPrWXV4Wh7H/KB6piRf3
+  skip_symbols: false
+  symbol_server:
