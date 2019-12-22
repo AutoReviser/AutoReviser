@@ -46,8 +46,7 @@
             public ComplexImmutableObject Golf { get; }
         }
 
-        [TestMethod]
-        [AutoData]
+        [TestMethod, AutoData]
         public void Revise_creates_new_object_with_new_property_value(
             SimpleImmutableObject seed, Guid alfa)
         {
@@ -60,8 +59,7 @@
             actual.Charlie.Should().Be(seed.Charlie);
         }
 
-        [TestMethod]
-        [AutoData]
+        [TestMethod, AutoData]
         public void Revise_creates_new_object_with_two_new_property_values(
             SimpleImmutableObject seed, Guid alfa, int bravo)
         {
@@ -75,8 +73,7 @@
             actual.Charlie.Should().Be(seed.Charlie);
         }
 
-        [TestMethod]
-        [AutoData]
+        [TestMethod, AutoData]
         public void Revise_creates_new_object_with_three_new_property_values(
             SimpleImmutableObject seed, Guid alfa, int bravo, string charlie)
         {
@@ -93,8 +90,7 @@
             actual.Charlie.Should().Be(charlie);
         }
 
-        [TestMethod]
-        [AutoData]
+        [TestMethod, AutoData]
         public void Revise_creates_new_object_with_new_deep_property_value(
             ComplexImmutableObject seed, Guid alfa)
         {
@@ -109,8 +105,7 @@
             actual.Echo.Charlie.Should().Be(seed.Echo.Charlie);
         }
 
-        [TestMethod]
-        [AutoData]
+        [TestMethod, AutoData]
         public void Revise_creates_new_object_with_two_new_deep_property_values(
             ComplexImmutableObject seed, Guid alfa, int bravo)
         {
@@ -127,8 +122,7 @@
             actual.Echo.Charlie.Should().Be(seed.Echo.Charlie);
         }
 
-        [TestMethod]
-        [AutoData]
+        [TestMethod, AutoData]
         public void Revise_creates_new_object_with_new_more_deep_property_value(
             MoreComplexImmutableObject seed, Guid alfa)
         {
@@ -144,8 +138,7 @@
             actual.Golf.Echo.Charlie.Should().Be(seed.Golf.Echo.Charlie);
         }
 
-        [TestMethod]
-        [AutoData]
+        [TestMethod, AutoData]
         public void Revise_creates_new_object_with_two_new_more_deep_property_values(
             MoreComplexImmutableObject seed, Guid alfa, int bravo)
         {
@@ -163,8 +156,7 @@
             actual.Golf.Echo.Charlie.Should().Be(seed.Golf.Echo.Charlie);
         }
 
-        [TestMethod]
-        [AutoData]
+        [TestMethod, AutoData]
         public void Revise_creates_new_object_with_complex_condition(
             MoreComplexImmutableObject seed,
             Guid alfa,
@@ -186,8 +178,7 @@
             actual.Golf.Echo.Charlie.Should().Be(seed.Golf.Echo.Charlie);
         }
 
-        [TestMethod]
-        [AutoData]
+        [TestMethod, AutoData]
         public void Revise_updates_element_in_immutable_array(
             [ImmutableArrayCustomization] ImmutableArray<string> seed,
             string element)
@@ -223,8 +214,7 @@
                 => new HasPrivateConstructor(alfa: 1, bravo: "foo");
         }
 
-        [TestMethod]
-        [AutoData]
+        [TestMethod, AutoData]
         public void Revise_creates_new_object_using_non_public_constructor_correctly(
             int alfa, string bravo)
         {
@@ -343,8 +333,7 @@
             internal SimpleImmutableObject Charlie { get; }
         }
 
-        [TestMethod]
-        [AutoData]
+        [TestMethod, AutoData]
         public void Revise_updates_internal_properties_correctly(
             Guid alfa,
             int bravo,
@@ -361,6 +350,33 @@
             actual.Alfa.Should().Be(alfa);
             actual.Bravo.Should().Be(bravo);
             actual.Charlie.Should().BeEquivalentTo(expected);
+        }
+
+        public class HasClosedProperty
+        {
+            public HasClosedProperty(Guid alfa) => Alfa = alfa;
+
+            public Guid Alfa { get; }
+
+            public int Bravo => 1024;
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_explicitly_fails_to_update_non_injectable_property(
+            HasClosedProperty source,
+            int bravo)
+        {
+            Action action = () => source.Revise(x => x.Bravo == bravo);
+            action.Should().Throw<InvalidOperationException>();
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_does_not_fail_just_because_object_has_non_injectable_property(
+            HasClosedProperty source,
+            Guid alfa)
+        {
+            Action action = () => source.Revise(x => x.Alfa == alfa);
+            action.Should().NotThrow();
         }
     }
 }

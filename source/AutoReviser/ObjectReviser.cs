@@ -141,8 +141,12 @@
                         object value = _arguments[i].Value;
                         object newValue = reviser.Invoke(value);
                         _arguments[i] = _arguments[i].SetValue(newValue);
+                        return;
                     }
                 }
+
+                string message = $"No constructor parameter was found to match the property '{property.Name}'.";
+                throw new InvalidOperationException(message);
             }
         }
     }
