@@ -10,6 +10,7 @@ test:
   assemblies: '**\*.tests.dll'
 artifacts:
 - path: '**\AutoReviser.**.nupkg'
+- path: '**\AutoReviser.**.snupkg'
 deploy:
 - provider: NuGet
   api_key:
