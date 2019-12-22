@@ -12,6 +12,7 @@
         private static readonly IReviser[] _revisers = new IReviser[]
         {
             new ImmutableArrayReviser(),
+            new ImmutableDictionaryReviser(),
             new ObjectReviser(),
         };
 

@@ -316,6 +316,94 @@
             revision.Delta[1].Echo.Alfa.Should().Be(value);
         }
 
+        public class HasImmutableDictionaryProperty
+        {
+            public HasImmutableDictionaryProperty(
+                int alfa,
+                ImmutableDictionary<int, string> bravo,
+                ImmutableDictionary<int, SimpleImmutableObject> charlie,
+                ImmutableDictionary<int, ComplexImmutableObject> delta)
+            {
+                Alfa = alfa;
+                Bravo = bravo;
+                Charlie = charlie;
+                Delta = delta;
+            }
+
+            public int Alfa { get; }
+
+            public ImmutableDictionary<int, string> Bravo { get; }
+
+            public ImmutableDictionary<int, SimpleImmutableObject> Charlie { get; }
+
+            public ImmutableDictionary<int, ComplexImmutableObject> Delta { get; }
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_sets_value_to_immutable_dictionary_correctly(
+            [ImmutableDictionaryCustomization] ImmutableDictionary<int, string> seed,
+            int key,
+            string value)
+        {
+            ImmutableDictionary<int, string> revision = seed.Revise(x => x[key] == value);
+            revision.Should().Contain(key, value);
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_sets_value_to_nested_immutable_dictionary_correctly(
+            [ImmutableDictionaryCustomization] HasImmutableDictionaryProperty seed,
+            int key,
+            string value)
+        {
+            HasImmutableDictionaryProperty revision = seed.Revise(x => x.Bravo[key] == value);
+            revision.Bravo.Should().Contain(key, value);
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_updates_property_of_value_in_nested_immutable_dictionary_correctly(
+            [ImmutableDictionaryCustomization] HasImmutableDictionaryProperty seed,
+            Guid value)
+        {
+            int key = seed.Charlie.Keys.Sample();
+            HasImmutableDictionaryProperty revision = seed.Revise(x => x.Charlie[key].Alfa == value);
+            revision.Charlie[key].Alfa.Should().Be(value);
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_updates_deep_property_of_value_in_nested_immutable_dictionary_correctly(
+            [ImmutableDictionaryCustomization] HasImmutableDictionaryProperty seed,
+            Guid value)
+        {
+            int key = seed.Delta.Keys.Sample();
+            HasImmutableDictionaryProperty revision = seed.Revise(x => x.Delta[key].Echo.Alfa == value);
+            revision.Delta[key].Echo.Alfa.Should().Be(value);
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_correctly_updates_immutable_dictionary_with_compound_expression(
+            [ImmutableDictionaryCustomization] HasImmutableDictionaryProperty seed,
+            int alfa,
+            string value1,
+            Guid value2,
+            Guid value3)
+        {
+            int key1 = seed.Bravo.Keys.Sample();
+            int key2 = seed.Charlie.Keys.Sample();
+            int key3 = seed.Delta.Keys.Sample();
+
+            HasImmutableDictionaryProperty revision = seed.Revise(
+                x =>
+                x.Alfa == alfa &&
+                x.Bravo[key1] == value1 &&
+                x.Charlie[key2].Alfa == value2 &&
+                x.Delta[key3].Echo.Alfa == value3);
+
+            revision.Alfa.Should().Be(alfa);
+            revision.Bravo[key1].Should().Be(value1);
+            revision.Charlie[key2].Alfa.Should().Be(value2);
+            revision.Delta[key3].Echo.Alfa.Should().Be(value3);
+        }
+
         public class ImmutableObjectWithInternalProperties
         {
             public ImmutableObjectWithInternalProperties(
