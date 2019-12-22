@@ -35,7 +35,7 @@
             };
 
             return (TImmutableArray)typeof(ImmutableArray)
-                .GetMethod("Factory", Static | NonPublic)
+                .GetMethod(nameof(Factory), Static | NonPublic)
                 .MakeGenericMethod(typeArguments)
                 .Invoke(obj: default, new[] { elements });
         }

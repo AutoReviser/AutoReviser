@@ -7,33 +7,26 @@
 
     internal static class ExpressionAssembler
     {
-        public static Queue<Expression> Disassemble(Expression expression)
+        public static Queue<Expression> Disassemble(Expression expression) => expression switch
         {
-            switch (expression)
-            {
-                case MemberExpression member
-                when member.Member is PropertyInfo:
-                    {
-                        Queue<Expression> path = Disassemble(member.Expression);
-                        path.Enqueue(member);
-                        return path;
-                    }
+            MemberExpression member when member.Member is PropertyInfo => Disassemble(member),
+            MethodCallExpression call => Disassemble(call),
+            UnaryExpression unary when unary.NodeType == ExpressionType.Convert => Disassemble(unary.Operand),
+            _ => new Queue<Expression>(),
+        };
 
-                case MethodCallExpression call:
-                    {
-                        Queue<Expression> path = Disassemble(call.Object);
-                        path.Enqueue(call);
-                        return path;
-                    }
+        private static Queue<Expression> Disassemble(MemberExpression member)
+        {
+            Queue<Expression> path = Disassemble(member.Expression);
+            path.Enqueue(member);
+            return path;
+        }
 
-                case UnaryExpression unary
-                when unary.NodeType == ExpressionType.Convert:
-                    {
-                        return Disassemble(unary.Operand);
-                    }
-
-                default: return new Queue<Expression>();
-            }
+        private static Queue<Expression> Disassemble(MethodCallExpression call)
+        {
+            Queue<Expression> path = Disassemble(call.Object);
+            path.Enqueue(call);
+            return path;
         }
 
         public static LambdaExpression AssembleLambda(
@@ -42,23 +35,20 @@
             Expression right)
         {
             Expression left = parameter;
-            foreach (var segment in leftPath)
+            foreach (Expression segment in leftPath)
             {
-                switch (segment)
-                {
-                    case MemberExpression member
-                    when member.Member is PropertyInfo property:
-                        left = MakeMemberAccess(left, property);
-                        break;
-
-                    case MethodCallExpression call:
-                        left = Call(left, call.Method, call.Arguments);
-                        break;
-                }
+                left = Assemble(left, segment);
             }
 
-            var predicate = MakeBinary(ExpressionType.Equal, left, right);
+            BinaryExpression predicate = MakeBinary(ExpressionType.Equal, left, right);
             return Lambda(predicate, parameter);
         }
+
+        private static Expression Assemble(Expression left, Expression segment) => segment switch
+        {
+            MemberExpression member when member.Member is PropertyInfo property => MakeMemberAccess(left, property),
+            MethodCallExpression call => Call(left, call.Method, call.Arguments),
+            _ => left,
+        };
     }
 }

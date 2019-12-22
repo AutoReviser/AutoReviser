@@ -25,19 +25,9 @@
         private static Argument[] GetInitialArguments<T>(
             ConstructorInfo constructor, T instance)
         {
-            IEnumerable<Argument> argumentQuery =
-                from p in constructor.GetParameters()
-                let parameterType = p.ParameterType
-                let name = p.Name
-                let value = DefaultOf(p.ParameterType)
-                select new Argument(parameterType, name, value);
+            Argument[] arguments = GetDefaultArguments(constructor);
 
-            Argument[] arguments = argumentQuery.ToArray();
-
-            PropertyInfo[] properties = instance
-                .GetType()
-                .GetProperties(Public | Instance | NonPublic);
-            foreach (PropertyInfo property in properties)
+            foreach (PropertyInfo property in GetProperties(instance))
             {
                 for (int i = 0; i < arguments.Length; i++)
                 {
@@ -53,6 +43,18 @@
             return arguments;
         }
 
+        private static Argument[] GetDefaultArguments(ConstructorInfo constructor)
+        {
+            IEnumerable<Argument> query =
+                from p in constructor.GetParameters()
+                let parameterType = p.ParameterType
+                let name = p.Name
+                let value = DefaultOf(p.ParameterType)
+                select new Argument(parameterType, name, value);
+
+            return query.ToArray();
+        }
+
         private static object DefaultOf(Type type)
         {
             MethodInfo template = typeof(ObjectReviser)
@@ -62,6 +64,13 @@
         }
 
         private static T Default<T>() => default;
+
+        private static PropertyInfo[] GetProperties<T>(T instance)
+        {
+            return instance
+                .GetType()
+                .GetProperties(Public | Instance | NonPublic);
+        }
 
         private readonly struct PredicateVisitor
         {
