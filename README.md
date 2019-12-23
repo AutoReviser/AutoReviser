@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/n9tskki80p2g6ahk/branch/master?svg=true)](https://ci.appveyor.com/project/gyuwon/autoreviser/branch/master)
 
-C# is a great programming language but does not have a handy way to update immutable objects partially. AutoReviser provides helper extension methods to generate partially updated copies of immutable objects using lambda expressions. You need not to write `With...()` methods anymore. You just need to tell AutoReviser what properties should be updated to what values using lambda expression.
+C# is a great programming language but does not have any handy way to update immutable objects partially. AutoReviser provides helper extension methods to generate partially updated copies of immutable objects using lambda expressions. You need not to write `With...()` methods anymore. You just need to tell AutoReviser what properties should be updated to what values using lambda expression.
 
 ## How to use
 
@@ -82,9 +82,11 @@ var revision = source.Revise(
     x.Delta.Bravo == "foo");
 ```
 
-### Immutable Arrays
+### Immutable Collections
 
-AutoReviser supports `System.Collections.Immutable.ImmutableArray<T>` class.
+AutoReviser supports `System.Collections.Immutable.ImmutableArray<T>` struct and `System.Collections.Immutable.ImmutableDictionary<TKey, TValue>` class.
+
+#### ImmutableArray
 
 ```csharp
 using AutoReviser;
@@ -101,8 +103,29 @@ var source = new HasImmutableArray(alfa: ImmutableArray.Create("foo", "bar"));
 
 var revision = source.Revise(
     x =>
-    x.Alfa[0] = "baz" &&
-    x.Alfa[1] = "foz");
+    x.Alfa[0] == "baz" &&
+    x.Alfa[1] == "foz");
+```
+
+#### ImmutableDictionary
+
+```csharp
+using AutoReviser;
+using System.Collections.Immutable;
+
+public class HasImmutableDictionary
+{
+    public HasImmutableDictionary(ImmutableDictionary<int, string> alfa) => Alfa = alfa;
+
+    public ImmutableDictionary<int, string> Alfa { get; }
+}
+
+var source = new HasImmutableArray(alfa: ImmutableDictionary<int, string>.Empty);
+
+var revision = source.Revise(
+    x =>
+    x.Alfa[0] == "baz" &&
+    x.Alfa[1] == "foz");
 ```
 
 ## Install package
@@ -116,7 +139,7 @@ PM> Install-Package AutoReviser
 ```
 MIT License
 
-Copyright (c) 2018 Gyuwon Yi
+Copyright (c) 2019 Gyuwon Yi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
