@@ -10,7 +10,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>AutoReviser</PackageId>
     <Description>Provides convenient utilities to generate partially updated copies of immutable objects using lambda expressions in C#.</Description>
-    <Version>0.2.1</Version>
+    <Version>0.2.2</Version>
     <Authors>Gyuwon</Authors>
     <Copyright>Copyright (c) 2018 Yi Gyuwon</Copyright>
     <PackageProjectUrl>https://github.com/AutoReviser/AutoReviser</PackageProjectUrl>
