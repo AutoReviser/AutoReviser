@@ -260,6 +260,31 @@
             actual.Bravo.Should().Be(bravo);
         }
 
+        public class HasNullableEnumProperty
+        {
+            public HasNullableEnumProperty(int alfa, Color? bravo)
+            {
+                Alfa = alfa;
+                Bravo = bravo;
+            }
+
+            public int Alfa { get; }
+
+            public Color? Bravo { get; }
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_updates_property_of_nullable_enum_type_correctly(
+            HasNullableEnumProperty seed, Color bravo)
+        {
+            HasNullableEnumProperty actual = default;
+
+            Action action = () => actual = seed.Revise(x => x.Bravo == bravo);
+
+            action.Should().NotThrow();
+            actual.Bravo.Should().Be(bravo);
+        }
+
         public class HasImmutableArrayProperty
         {
             public HasImmutableArrayProperty(
