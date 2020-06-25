@@ -1,6 +1,7 @@
 ﻿namespace AutoReviser
 {
     using System;
+    using System.Linq.Expressions;
     using System.Reflection;
     using static System.StringComparison;
 
@@ -10,7 +11,7 @@
         {
             ParameterType = parameterType;
             ParameterName = parameterName;
-            Value = value;
+            Value = CastIfNeeded(value, parameterType);
         }
 
         public Type ParameterType { get; }
@@ -25,5 +26,24 @@
 
         public Argument SetValue(object value)
             => new Argument(ParameterType, ParameterName, value);
+
+        private static object CastIfNeeded(object value, Type type)
+        {
+            if (value == null)
+            {
+                return value;
+            }
+
+            if (value.GetType() == type)
+            {
+                return value;
+            }
+
+            // TODO: Cache the lambda Delegate.
+            ParameterExpression parameter = Expression.Parameter(value.GetType());
+            UnaryExpression body = Expression.Convert(parameter, type);
+            LambdaExpression lambda = Expression.Lambda(body, parameter);
+            return lambda.Compile().DynamicInvoke(value);
+        }
     }
 }
