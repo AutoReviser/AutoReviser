@@ -1,6 +1,7 @@
 ﻿namespace AutoReviser
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -19,11 +20,17 @@
 
         public static object[] ToArray(object instance)
         {
+            Type[] typeArguments = instance.GetType().GetGenericArguments();
+
             MethodInfo method = typeof(Enumerable)
                 .GetMethod("ToArray")
-                .MakeGenericMethod(instance.GetType().GetGenericArguments());
+                .MakeGenericMethod(typeArguments);
 
-            return (object[])method.Invoke(obj: default, new[] { instance });
+            object array = method.Invoke(obj: default, new[] { instance });
+
+            return typeArguments[0].IsValueType
+                ? ((IEnumerable)array).Cast<object>().ToArray()
+                : (object[])array;
         }
 
         public static TImmutableArray Create<TImmutableArray>(object[] elements)

@@ -491,5 +491,27 @@
             Action action = () => source.Revise(x => x.Alfa == alfa);
             action.Should().NotThrow();
         }
+
+        public readonly struct ImmutableValueObject
+        {
+            public ImmutableValueObject(Guid alfa, int bravo)
+            {
+                Alfa = alfa;
+                Bravo = bravo;
+            }
+
+            public Guid Alfa { get; }
+
+            public int Bravo { get; }
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_correctly_updates_value_object_element_in_array(
+            [ImmutableArrayCustomization] ImmutableArray<ImmutableValueObject> source,
+            Guid alfa)
+        {
+            ImmutableArray<ImmutableValueObject> actual = source.Revise(x => x[0].Alfa == alfa);
+            actual[0].Alfa.Should().Be(alfa);
+        }
     }
 }
