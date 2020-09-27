@@ -40,8 +40,17 @@
                 left = Assemble(left, segment);
             }
 
-            BinaryExpression predicate = MakeBinary(ExpressionType.Equal, left, right);
+            BinaryExpression predicate = MakeBinary(
+                ExpressionType.Equal,
+                left: left.Type.IsEnum ? ConvertToInt32(left) : left,
+                right);
+
             return Lambda(predicate, parameter);
+        }
+
+        private static UnaryExpression ConvertToInt32(Expression left)
+        {
+            return MakeUnary(ExpressionType.Convert, left, typeof(int));
         }
 
         private static Expression Assemble(Expression left, Expression segment) => segment switch

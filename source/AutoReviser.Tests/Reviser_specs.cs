@@ -492,17 +492,27 @@
             action.Should().NotThrow();
         }
 
+        public enum Jedi
+        {
+            Yoda,
+            Windu,
+            QuiGon,
+        }
+
         public readonly struct ImmutableValueObject
         {
-            public ImmutableValueObject(Guid alfa, int bravo)
+            public ImmutableValueObject(Guid alfa, int bravo, Jedi charlie)
             {
                 Alfa = alfa;
                 Bravo = bravo;
+                Charlie = charlie;
             }
 
             public Guid Alfa { get; }
 
             public int Bravo { get; }
+
+            public Jedi Charlie { get; }
         }
 
         [TestMethod, AutoData]
@@ -512,6 +522,15 @@
         {
             ImmutableArray<ImmutableValueObject> actual = source.Revise(x => x[0].Alfa == alfa);
             actual[0].Alfa.Should().Be(alfa);
+        }
+
+        [TestMethod, AutoData]
+        public void Revise_correctly_updates_enum_property_of_value_object_element_in_array(
+            [ImmutableArrayCustomization] ImmutableArray<ImmutableValueObject> source,
+            Jedi charlie)
+        {
+            ImmutableArray<ImmutableValueObject> actual = source.Revise(x => x[0].Charlie == charlie);
+            actual[0].Charlie.Should().Be(charlie);
         }
     }
 }
