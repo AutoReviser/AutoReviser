@@ -10,7 +10,14 @@
         public static ConstructorInfo Resolve<T>()
         {
             BindingFlags attr = Public | NonPublic | Instance;
-            return typeof(T).GetConstructors(attr).Single();
+            ConstructorInfo[] constructors = typeof(T).GetConstructors(attr);
+            return constructors.Single(c => IsCloneConstructor<T>(c) == false);
+        }
+
+        private static bool IsCloneConstructor<T>(ConstructorInfo constructor)
+        {
+            ParameterInfo[] parameters = constructor.GetParameters();
+            return parameters.Length == 1 && parameters[0].ParameterType == typeof(T);
         }
     }
 }
