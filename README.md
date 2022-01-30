@@ -1,4 +1,4 @@
-# AutoRevisor
+# AutoReviser
 
 [![Build status](https://ci.appveyor.com/api/projects/status/n9tskki80p2g6ahk/branch/master?svg=true)](https://ci.appveyor.com/project/gyuwon/autoreviser/branch/master)
 
