@@ -1,13 +1,11 @@
 version: 0.2.{build}
-image: Visual Studio 2019
+image: Visual Studio 2022
 configuration: Release
 before_build:
 - cmd: nuget restore source\AutoReviser.sln
 build:
   verbosity: minimal
-after_build:
-test:
-  assemblies: '**\*.tests.dll'
+after_build: []
 artifacts:
 - path: '**\AutoReviser.**.nupkg'
 - path: '**\AutoReviser.**.snupkg'
